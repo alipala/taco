@@ -1,0 +1,47 @@
+# ---- General ----
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.bak
+*.tmp
+*.log
+
+# ---- Python (backend) ----
+backend/venv/
+backend/__pycache__/
+backend/**/*.pyc
+backend/**/*.pyo
+backend/.env
+backend/.env.*
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.coverage
+backend/htmlcov/
+backend/.vscode/
+
+# ---- Node/React (frontend) ----
+frontend/node_modules/
+frontend/build/
+frontend/.env
+frontend/.env.*
+frontend/.pnp*
+frontend/.cache/
+frontend/.next/
+frontend/.vscode/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/package-lock.json
+
+# ---- Docker ----
+*.local
+
+# ---- IDEs ----
+.idea/
+.vscode/
+*.iml
+
+# ---- Others ----
+.env
+.env.*
