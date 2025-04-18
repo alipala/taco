@@ -1,20 +1,25 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Globe, ChevronDown, Menu, X } from 'lucide-react';
+import AuthModal from './AuthModal';
+import { useAppContext } from '../../contexts/AppContext.jsx';
 
 /**
  * Navbar component for the application
  * Provides navigation links and user authentication options
  */
-const Navbar: React.FC = () => {
+const Navbar = () => {
   // State for mobile menu toggle
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // State for user profile dropdown
   const [profileOpen, setProfileOpen] = useState(false);
   
-  // Mock user state - in a real app, this would come from auth context
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // State for auth modal
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  
+  // Get login state from context
+  const { state, setIsLoggedIn } = useAppContext();
 
   return (
     <nav className="bg-white border-b border-gray-100">
@@ -75,7 +80,7 @@ const Navbar: React.FC = () => {
             </div>
             
             {/* Auth Buttons or User Profile */}
-            {isLoggedIn ? (
+            {state.isLoggedIn ? (
               <div className="relative">
                 <button 
                   className="flex items-center text-sm focus:outline-none"
@@ -114,16 +119,18 @@ const Navbar: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <button 
                   className="text-gray-500 hover:text-teal-400 text-sm"
-                  onClick={() => setIsLoggedIn(true)}
+                  onClick={() => setAuthModalOpen(true)}
                 >
                   Sign In
                 </button>
-                <Link 
-                  to="/signup" 
+                <button 
                   className="bg-teal-400 text-white px-4 py-2 rounded-lg hover:bg-teal-500 transition-colors text-sm font-medium"
+                  onClick={() => {
+                    setAuthModalOpen(true);
+                  }}
                 >
                   Sign Up
-                </Link>
+                </button>
               </div>
             )}
             
@@ -156,29 +163,37 @@ const Navbar: React.FC = () => {
             >
               My Progress
             </Link>
-            {!isLoggedIn && (
+            {!state.isLoggedIn && (
               <>
                 <button 
                   className="w-full text-left pl-3 pr-4 py-2 text-base font-medium text-gray-500 hover:text-teal-400 hover:bg-gray-50"
                   onClick={() => {
-                    setIsLoggedIn(true);
+                    setAuthModalOpen(true);
                     setMobileMenuOpen(false);
                   }}
                 >
                   Sign In
                 </button>
-                <Link 
-                  to="/signup" 
-                  className="block pl-3 pr-4 py-2 text-base font-medium text-teal-400"
-                  onClick={() => setMobileMenuOpen(false)}
+                <button 
+                  className="w-full text-left pl-3 pr-4 py-2 text-base font-medium text-teal-400"
+                  onClick={() => {
+                    setAuthModalOpen(true);
+                    setMobileMenuOpen(false);
+                  }}
                 >
                   Sign Up
-                </Link>
+                </button>
               </>
             )}
           </div>
         </div>
       )}
+      
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={authModalOpen} 
+        onClose={() => setAuthModalOpen(false)} 
+      />
     </nav>
   );
 };

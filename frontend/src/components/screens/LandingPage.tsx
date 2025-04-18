@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, Mic, MessageSquare, BarChart2, BookOpen } from 'lucide-react';
-import MainLayout from '../layout/MainLayout';
+import MainLayout from '../layout/MainLayout.jsx';
 
 /**
  * LandingPage component

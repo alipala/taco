@@ -1,31 +1,7 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-
-/**
- * Interface for the application state
- */
-interface AppState {
-  selectedLanguage: string | null;
-  proficiencyLevel: string | null;
-  selectedTopic: string | null;
-  customTopic: string;
-  isLoggedIn: boolean;
-}
-
-/**
- * Interface for the context value
- */
-interface AppContextValue {
-  state: AppState;
-  setLanguage: (language: string) => void;
-  setProficiencyLevel: (level: string) => void;
-  setTopic: (topic: string) => void;
-  setCustomTopic: (topic: string) => void;
-  setIsLoggedIn: (isLoggedIn: boolean) => void;
-  resetSelections: () => void;
-}
+import React, { createContext, useContext, useState } from 'react';
 
 // Create the context with a default value
-const AppContext = createContext<AppContextValue | undefined>(undefined);
+const AppContext = createContext(undefined);
 
 /**
  * Custom hook to use the app context
@@ -39,19 +15,12 @@ export const useAppContext = () => {
 };
 
 /**
- * Props for the AppProvider component
- */
-interface AppProviderProps {
-  children: ReactNode;
-}
-
-/**
  * AppProvider component
  * Provides application state and functions to update it
  */
-export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
+export const AppProvider = ({ children }) => {
   // Initialize state
-  const [state, setState] = useState<AppState>({
+  const [state, setState] = useState({
     selectedLanguage: null,
     proficiencyLevel: null,
     selectedTopic: null,
@@ -63,7 +32,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
    * Set the selected language
    * @param language - The language to set
    */
-  const setLanguage = (language: string) => {
+  const setLanguage = (language) => {
     setState(prevState => ({
       ...prevState,
       selectedLanguage: language,
@@ -74,7 +43,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
    * Set the proficiency level
    * @param level - The proficiency level to set
    */
-  const setProficiencyLevel = (level: string) => {
+  const setProficiencyLevel = (level) => {
     setState(prevState => ({
       ...prevState,
       proficiencyLevel: level,
@@ -85,7 +54,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
    * Set the selected topic
    * @param topic - The topic to set
    */
-  const setTopic = (topic: string) => {
+  const setTopic = (topic) => {
     setState(prevState => ({
       ...prevState,
       selectedTopic: topic,
@@ -96,7 +65,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
    * Set the custom topic
    * @param topic - The custom topic to set
    */
-  const setCustomTopic = (topic: string) => {
+  const setCustomTopic = (topic) => {
     setState(prevState => ({
       ...prevState,
       customTopic: topic,
@@ -107,7 +76,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
    * Set the login status
    * @param isLoggedIn - Whether the user is logged in
    */
-  const setIsLoggedIn = (isLoggedIn: boolean) => {
+  const setIsLoggedIn = (isLoggedIn) => {
     setState(prevState => ({
       ...prevState,
       isLoggedIn,
@@ -128,7 +97,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   // Create the context value
-  const value: AppContextValue = {
+  const value = {
     state,
     setLanguage,
     setProficiencyLevel,

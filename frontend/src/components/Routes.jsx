@@ -2,17 +2,20 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // Import screen components
-import LandingPage from './screens/LandingPage';
-import LanguageSelectionScreen from './screens/LanguageSelectionScreen';
-import ProficiencyLevelScreen from './screens/ProficiencyLevelScreen';
-import TopicSelectionScreen from './screens/TopicSelectionScreen';
-import ConversationScreen from './screens/ConversationScreen';
+import LandingPage from './screens/LandingPage.tsx';
+import LanguageSelectionScreen from './screens/LanguageSelectionScreen.tsx';
+import ProficiencyLevelScreen from './screens/ProficiencyLevelScreen.tsx';
+import TopicSelectionScreen from './screens/TopicSelectionScreen.tsx';
+import ConversationScreen from './screens/ConversationScreen.tsx';
+import SpeakingAssessmentScreen from './screens/SpeakingAssessmentScreen.jsx';
+import SpeechConversationScreen from './screens/SpeechConversationScreen.jsx';
+import UserProfileDashboard from './screens/UserProfileDashboard.jsx';
 
 /**
  * AppRoutes component
  * Defines the routing structure for the application
  */
-const AppRoutes: React.FC = () => {
+const AppRoutes = () => {
   return (
     <BrowserRouter>
       <Routes>
@@ -20,8 +23,11 @@ const AppRoutes: React.FC = () => {
         <Route path="/" element={<LandingPage />} />
         <Route path="/language-selection" element={<LanguageSelectionScreen />} />
         <Route path="/proficiency-level" element={<ProficiencyLevelScreen />} />
+        <Route path="/speaking-assessment" element={<SpeakingAssessmentScreen />} />
         <Route path="/topic-selection" element={<TopicSelectionScreen />} />
         <Route path="/conversation" element={<ConversationScreen />} />
+        <Route path="/speech-conversation" element={<SpeechConversationScreen />} />
+        <Route path="/profile" element={<UserProfileDashboard />} />
         
         {/* Redirect any unknown routes to home */}
         <Route path="*" element={<Navigate to="/" replace />} />

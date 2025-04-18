@@ -1,15 +1,11 @@
 import React from 'react';
-import Navbar from '../common/Navbar';
+import Navbar from '../common/Navbar.jsx';
 
 /**
  * MainLayout component
  * Wraps the application pages with common layout elements like navbar and footer
  */
-interface MainLayoutProps {
-  children: React.ReactNode;
-}
-
-const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+const MainLayout = ({ children }) => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />

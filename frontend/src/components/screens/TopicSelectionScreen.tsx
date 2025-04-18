@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Search, X, RefreshCw } from 'lucide-react';
-import MainLayout from '../layout/MainLayout';
+import MainLayout from '../layout/MainLayout.jsx';
 
 /**
  * TopicSelectionScreen component

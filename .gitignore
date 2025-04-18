@@ -45,3 +45,5 @@ frontend/package-lock.json
 # ---- Others ----
 .env
 .env.*
+
+/designs
