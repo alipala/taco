@@ -16,6 +16,7 @@ const SpeakingAssessmentScreen = () => {
   
   // Handle recording state and animations
   useEffect(() => {
+    let interval;
     if (isRecording) {
       // First show the transition animation
       setTimeout(() => {
@@ -23,7 +24,7 @@ const SpeakingAssessmentScreen = () => {
       }, 300);
       
       // Update waveform and timer
-      const interval = setInterval(() => {
+      interval = setInterval(() => {
         setWaveform(prev => {
           return prev.map(value => {
             // Create a natural-looking speech pattern
