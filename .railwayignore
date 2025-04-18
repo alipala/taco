@@ -1,0 +1,7 @@
+# Ignore backend directory for frontend deployment
+backend/
+designs/
+.git/
+.github/
+node_modules/
+frontend/node_modules/

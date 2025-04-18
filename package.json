@@ -1,0 +1,25 @@
+{
+  "name": "language-learning-app",
+  "version": "1.0.0",
+  "description": "AI-powered language learning application",
+  "main": "index.js",
+  "scripts": {
+    "start": "cd frontend && npx serve -s build",
+    "build": "cd frontend && npm install && npm run build",
+    "test": "cd frontend && npm test"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alipala/taco.git"
+  },
+  "keywords": [
+    "language-learning",
+    "react",
+    "ai"
+  ],
+  "author": "",
+  "license": "MIT"
+}
