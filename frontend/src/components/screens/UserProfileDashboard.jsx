@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
-  Calendar, BarChart2, Clock, Target, ChevronDown, Edit2, 
-  Layout, Users, Settings, LogOut, ChevronRight 
+  Calendar, Clock, Target, ChevronDown, Edit2, 
+  Layout, LogOut, ChevronRight 
 } from 'lucide-react';
 
 /**
@@ -319,17 +319,17 @@ const UserProfileDashboard = () => {
                     </div>
                   </div>
                   
-                  <a href="#" className="text-sm text-teal-500 hover:text-teal-600 font-medium flex items-center">
+                  <button type="button" className="text-sm text-teal-500 hover:text-teal-600 font-medium flex items-center">
                     View Full Assessment Report
                     <ChevronRight size={16} className="ml-1" />
-                  </a>
+                  </button>
                 </div>
                 
                 {/* Recent Activity */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-bold text-gray-800">Recent Activity</h3>
-                    <a href="#" className="text-sm text-teal-500 hover:text-teal-600 font-medium">View All</a>
+                    <button type="button" className="text-sm text-teal-500 hover:text-teal-600 font-medium">View All</button>
                   </div>
                   
                   <div className="space-y-4">

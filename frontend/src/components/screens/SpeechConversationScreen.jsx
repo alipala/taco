@@ -4,7 +4,6 @@ import {
   Mic, Settings, MessageSquare, BookOpen, ListChecks, 
   CheckCircle, Info, ChevronRight, VolumeX, Volume2, Sliders 
 } from 'lucide-react';
-import MainLayout from '../layout/MainLayout.jsx';
 
 /**
  * SpeechConversationScreen component

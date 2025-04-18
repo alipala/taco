@@ -197,9 +197,9 @@ const AuthModal = ({ isOpen, onClose }) => {
                     Remember me
                   </label>
                 </div>
-                <a href="#" className="text-sm font-medium text-teal-500 hover:text-teal-600">
+                <button type="button" className="text-sm font-medium text-teal-500 hover:text-teal-600">
                   Forgot password?
-                </a>
+                </button>
               </div>
             )}
             
@@ -215,7 +215,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                     onChange={() => setAgreeToTerms(!agreeToTerms)}
                   />
                   <label htmlFor="terms" className="ml-2 block text-sm text-gray-500">
-                    I agree to the <a href="#" className="text-teal-500 hover:text-teal-600">Terms of Service</a> and <a href="#" className="text-teal-500 hover:text-teal-600">Privacy Policy</a>
+                    I agree to the <button type="button" className="text-teal-500 hover:text-teal-600 p-0 m-0 inline font-normal">Terms of Service</button> and <button type="button" className="text-teal-500 hover:text-teal-600 p-0 m-0 inline font-normal">Privacy Policy</button>
                   </label>
                 </div>
               </div>

@@ -3,7 +3,6 @@ import {
   Mic, Settings, MessageSquare, BookOpen, ListChecks, 
   CheckCircle, Info, ChevronRight, VolumeX, Volume2, X 
 } from 'lucide-react';
-import MainLayout from '../layout/MainLayout.jsx';
 
 /**
  * ConversationScreen component

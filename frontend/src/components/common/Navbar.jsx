@@ -62,18 +62,18 @@ const Navbar = () => {
                 </button>
                 <div className="absolute z-10 right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden group-hover:block">
                   <div className="py-1">
-                    <a href="#" className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    <button type="button" className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left">
                       <span className="mr-2">🇬🇧</span> English
-                    </a>
-                    <a href="#" className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    </button>
+                    <button type="button" className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left">
                       <span className="mr-2">🇪🇸</span> Español
-                    </a>
-                    <a href="#" className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    </button>
+                    <button type="button" className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left">
                       <span className="mr-2">🇫🇷</span> Français
-                    </a>
-                    <a href="#" className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    </button>
+                    <button type="button" className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left">
                       <span className="mr-2">🇩🇪</span> Deutsch
-                    </a>
+                    </button>
                   </div>
                 </div>
               </div>

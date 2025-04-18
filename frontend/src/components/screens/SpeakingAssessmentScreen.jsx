@@ -34,11 +34,10 @@ const SpeakingAssessmentScreen = () => {
         });
         
         // Update the timer
-        setSeconds(s => s + 0.1);
-      }, 100);
-      
-      return () => clearInterval(interval);
+        setSeconds(prevSeconds => prevSeconds + 1);
+      }, 1000);
     } else {
+      clearInterval(interval);
       // Transition out
       setShowWave(false);
       
@@ -49,7 +48,8 @@ const SpeakingAssessmentScreen = () => {
         }, 500);
       }
     }
-  }, [isRecording]);
+    return () => clearInterval(interval);
+  }, [isRecording, seconds]);
   
   const formatTime = (totalSeconds) => {
     const minutes = Math.floor(totalSeconds / 60);
