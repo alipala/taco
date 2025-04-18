@@ -27,10 +27,10 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           {/* Logo & Main Navigation */}
           <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0 flex items-center">
+            <Link to="/" className="flex-shrink-0 flex items-center" aria-label="Go to landing page">
               <Globe className="text-teal-400 h-8 w-8" />
               <span className="ml-2 font-bold text-gray-800 text-lg hidden sm:block">
-                Your Smart <span className="text-teal-400">Language Coach</span>
+                Smart <span className="text-teal-400">Language Coach</span>
               </span>
             </Link>
             
