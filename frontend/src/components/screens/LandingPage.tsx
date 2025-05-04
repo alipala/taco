@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import { useAppContext } from '../../contexts/AppContext.jsx';
 import AuthModal from '../common/AuthModal.jsx';
+import LanguageOptionsModal from '../common/LanguageOptionsModal.tsx';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Redesigned LandingPage component for the Language Learning App
@@ -30,6 +32,8 @@ const LandingPage: React.FC = () => {
   const [hoverFeature, setHoverFeature] = useState<number | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const featuresRef = useRef<HTMLDivElement>(null);
+  const [showOptionsModal, setShowOptionsModal] = useState(false);
+  const [selectedLang, setSelectedLang] = useState('');
   
   // Track scroll position for animations
   useEffect(() => {
@@ -74,6 +78,22 @@ const LandingPage: React.FC = () => {
     setLanguage(language);
     openAuthModal('signup');
   };
+
+  // Handle language selection
+  const handleLanguageSelect = (language: string) => {
+    setLanguage(language);
+    setSelectedLang(language);
+    setShowOptionsModal(true);
+  };
+
+  // Handle option selection from modal
+const handleOptionSelection = (option: string) => {
+  if (option === 'assessment') {
+    navigate('/speaking-assessment');
+  } else if (option === 'practice') {
+    navigate('/topic-selection');
+  }
+};
 
   // Features array
   const features = [
@@ -744,8 +764,8 @@ const LandingPage: React.FC = () => {
                     ? 'border-teal-400 shadow-md' 
                     : 'border-gray-100 hover:border-teal-200 hover:shadow-sm'
                 }`}
-                onClick={() => setActiveLanguage(language.name)}
-              >
+                onClick={() => handleLanguageSelect(language.name)}
+                              >
                 <div className="p-6 text-center">
                   <div className="text-5xl mb-4">{language.flag}</div>
                   <h3 className="font-bold text-gray-800 text-lg mb-1">{language.name}</h3>
@@ -950,6 +970,14 @@ const LandingPage: React.FC = () => {
         isOpen={isAuthModalOpen} 
         onClose={() => setIsAuthModalOpen(false)} 
       />
+      
+    {/* Language Options Modal */}
+    <LanguageOptionsModal 
+      isOpen={showOptionsModal}
+      onClose={() => setShowOptionsModal(false)}
+      selectedLanguage={selectedLang}
+      onContinue={handleOptionSelection}
+    />
     </div>
   );
 };
