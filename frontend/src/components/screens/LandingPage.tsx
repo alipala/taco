@@ -27,8 +27,6 @@ import { useNavigate } from 'react-router-dom';
 const LandingPage: React.FC = () => {
   const { setLanguage } = useAppContext();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
-  const [activeLanguage, setActiveLanguage] = useState('English');
   const navigate = useNavigate();
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [selectedLang, setSelectedLang] = useState('');
@@ -70,15 +68,14 @@ const LandingPage: React.FC = () => {
   };
   
   // Handle opening auth modal
-  const openAuthModal = (mode: 'login' | 'signup') => {
-    setAuthMode(mode);
+  const openAuthModal = () => {
     setIsAuthModalOpen(true);
   };
 
   // Handle starting with a specific language
   const handleStartWithLanguage = (language: string) => {
     setLanguage(language);
-    openAuthModal('signup');
+    openAuthModal();
   };
 
   // Handle language selection
@@ -216,7 +213,7 @@ const handleOptionSelection = (option: string) => {
             <div className="flex items-center">
               <button 
   className={`text-sm font-medium border border-gray-300 px-4 py-1.5 rounded hover:bg-gray-50 transition-colors ${isScrolled ? 'text-gray-700' : 'text-white border-white hover:bg-white hover:bg-opacity-10'}`}
-  onClick={() => openAuthModal('login')}
+  onClick={() => openAuthModal()}
               >
                 Login
               </button>
@@ -522,7 +519,7 @@ const handleOptionSelection = (option: string) => {
                     <div className="flex">
                       <button 
                         className="w-full bg-teal-400 text-white py-3 rounded-lg hover:bg-teal-500 transition-colors font-medium"
-                        onClick={() => openAuthModal('signup')}
+                        onClick={() => openAuthModal()}
                       >
                         Start Your Assessment
                       </button>
@@ -586,7 +583,7 @@ const handleOptionSelection = (option: string) => {
                         />
                         <button 
                           className="absolute right-3 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full bg-teal-400 flex items-center justify-center text-white hover:bg-teal-500 transition-colors"
-                          onClick={() => openAuthModal('signup')}
+                          onClick={() => openAuthModal()}
                         >
                           <Mic size={18} />
                         </button>
@@ -596,7 +593,7 @@ const handleOptionSelection = (option: string) => {
                     <div className="mt-6 flex justify-center">
                       <button 
                         className="bg-teal-400 text-white px-6 py-3 rounded-lg hover:bg-teal-500 transition-colors font-medium"
-                        onClick={() => openAuthModal('signup')}
+                        onClick={() => openAuthModal()}
                       >
                         Start Immersive Practice Now
                       </button>
@@ -678,7 +675,7 @@ const handleOptionSelection = (option: string) => {
                     <div className="flex justify-center">
                       <button 
                         className="bg-yellow-400 text-white px-6 py-3 rounded-lg hover:bg-yellow-500 transition-colors font-medium"
-                        onClick={() => openAuthModal('signup')}
+                        onClick={() => openAuthModal()}
                       >
                         Get Personalized AI Analysis
                       </button>
@@ -729,7 +726,7 @@ const handleOptionSelection = (option: string) => {
                     <div className="flex justify-center">
                       <button 
                         className="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition-colors font-medium"
-                        onClick={() => openAuthModal('signup')}
+                        onClick={() => openAuthModal()}
                       >
                         Explore Listening Materials
                       </button>
@@ -762,7 +759,7 @@ const handleOptionSelection = (option: string) => {
               <div 
                 key={index} 
                 className={`bg-white rounded-xl border-2 transition-all cursor-pointer ${
-                  activeLanguage === language.name 
+                  selectedLang === language.name 
                     ? 'border-teal-400 shadow-md' 
                     : 'border-gray-100 hover:border-teal-200 hover:shadow-sm'
                 }`}
@@ -843,7 +840,7 @@ const handleOptionSelection = (option: string) => {
                         ? 'bg-white text-teal-500 hover:bg-gray-100' 
                         : 'bg-teal-400 text-white hover:bg-teal-500'
                     }`}
-                    onClick={() => openAuthModal('signup')}
+                    onClick={() => openAuthModal()}
                   >
                     {plan.cta}
                   </button>
@@ -865,7 +862,7 @@ const handleOptionSelection = (option: string) => {
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <button 
               className="bg-teal-400 text-white px-8 py-3 rounded-lg hover:bg-teal-500 transition-colors font-medium inline-flex items-center justify-center"
-              onClick={() => openAuthModal('signup')}
+              onClick={() => openAuthModal()}
             >
               Experience the Magic Now
               <Sparkles size={20} className="ml-2" />
