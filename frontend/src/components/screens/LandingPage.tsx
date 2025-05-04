@@ -19,21 +19,23 @@ import AuthModal from '../common/AuthModal.jsx';
 import LanguageOptionsModal from '../common/LanguageOptionsModal.tsx';
 import { useNavigate } from 'react-router-dom';
 
+
 /**
  * Redesigned LandingPage component for the Language Learning App
  * Features a more immersive, interactive design with clearer user journeys
  */
 const LandingPage: React.FC = () => {
-  const { state, setLanguage } = useAppContext();
+  const { setLanguage } = useAppContext();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
   const [activeLanguage, setActiveLanguage] = useState('English');
+  const navigate = useNavigate();
+  const [showOptionsModal, setShowOptionsModal] = useState(false);
+  const [selectedLang, setSelectedLang] = useState('');
   const [activeFeatureTab, setActiveFeatureTab] = useState<string | null>(null);
   const [hoverFeature, setHoverFeature] = useState<number | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const featuresRef = useRef<HTMLDivElement>(null);
-  const [showOptionsModal, setShowOptionsModal] = useState(false);
-  const [selectedLang, setSelectedLang] = useState('');
   
   // Track scroll position for animations
   useEffect(() => {
@@ -896,70 +898,18 @@ const handleOptionSelection = (option: string) => {
               <p className="text-gray-400 text-sm">
                 AI-powered language learning platform for immersive conversation practice
               </p>
-              <div className="mt-4 flex space-x-4">
-                {['twitter', 'facebook', 'instagram', 'linkedin'].map(social => (
-                  <a key={social} href="#" className="text-gray-400 hover:text-teal-400">
-                    <span className="sr-only">{social}</span>
-                    <div className="w-6 h-6"></div>
-                  </a>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <h3 className="font-bold mb-4">Product</h3>
-              <ul className="space-y-2">
-                {['Features', 'Pricing', 'Languages', 'Mobile App', 'API', 'Business'].map(item => (
-                  <li key={item}>
-                    <a href="#" className="text-gray-400 hover:text-teal-400 text-sm">
-                      {item}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="font-bold mb-4">Resources</h3>
-              <ul className="space-y-2">
-                {['Blog', 'Help Center', 'Guides', 'Learning Tips', 'Language Resources', 'Webinars'].map(item => (
-                  <li key={item}>
-                    <a href="#" className="text-gray-400 hover:text-teal-400 text-sm">
-                      {item}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="font-bold mb-4">Company</h3>
-              <ul className="space-y-2">
-                {['About Us', 'Careers', 'Privacy Policy', 'Terms of Service', 'Contact Us'].map(item => (
-                  <li key={item}>
-                    <a href="#" className="text-gray-400 hover:text-teal-400 text-sm">
-                      {item}
-                    </a>
-                  </li>
-                ))}
-              </ul>
             </div>
           </div>
-          
           <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
             <p className="text-sm text-gray-500 mb-4 md:mb-0">
-              © {new Date().getFullYear()} Smart Language Coach. All rights reserved.
+              &copy; {new Date().getFullYear()} Smart Language Coach. All rights reserved.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-sm text-gray-500 hover:text-teal-400">
-                Privacy Policy
-              </a>
-              <a href="#" className="text-sm text-gray-500 hover:text-teal-400">
-                Terms of Service
-              </a>
-              <a href="#" className="text-sm text-gray-500 hover:text-teal-400">
-                Cookies
-              </a>
+              <ul className="flex space-x-4">
+                <li><span className="text-sm text-gray-500 hover:text-teal-400 underline" style={{ cursor: 'pointer' }}>Privacy Policy</span></li>
+                <li><span className="text-sm text-gray-500 hover:text-teal-400 underline" style={{ cursor: 'pointer' }}>Terms of Service</span></li>
+                <li><span className="text-sm text-gray-500 hover:text-teal-400 underline" style={{ cursor: 'pointer' }}>Cookies</span></li>
+              </ul>
             </div>
           </div>
         </div>
