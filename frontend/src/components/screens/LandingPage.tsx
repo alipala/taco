@@ -19,21 +19,21 @@ import AuthModal from '../common/AuthModal.jsx';
 import LanguageOptionsModal from '../common/LanguageOptionsModal.tsx';
 import { useNavigate } from 'react-router-dom';
 
+
 /**
  * Redesigned LandingPage component for the Language Learning App
  * Features a more immersive, interactive design with clearer user journeys
  */
 const LandingPage: React.FC = () => {
-  const { state, setLanguage } = useAppContext();
+  const { setLanguage } = useAppContext();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
-  const [activeLanguage, setActiveLanguage] = useState('English');
+  const navigate = useNavigate();
+  const [showOptionsModal, setShowOptionsModal] = useState(false);
+  const [selectedLang, setSelectedLang] = useState('');
   const [activeFeatureTab, setActiveFeatureTab] = useState<string | null>(null);
   const [hoverFeature, setHoverFeature] = useState<number | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const featuresRef = useRef<HTMLDivElement>(null);
-  const [showOptionsModal, setShowOptionsModal] = useState(false);
-  const [selectedLang, setSelectedLang] = useState('');
   
   // Track scroll position for animations
   useEffect(() => {
@@ -68,15 +68,14 @@ const LandingPage: React.FC = () => {
   };
   
   // Handle opening auth modal
-  const openAuthModal = (mode: 'login' | 'signup') => {
-    setAuthMode(mode);
+  const openAuthModal = () => {
     setIsAuthModalOpen(true);
   };
 
   // Handle starting with a specific language
   const handleStartWithLanguage = (language: string) => {
     setLanguage(language);
-    openAuthModal('signup');
+    openAuthModal();
   };
 
   // Handle language selection
@@ -214,7 +213,7 @@ const handleOptionSelection = (option: string) => {
             <div className="flex items-center">
               <button 
   className={`text-sm font-medium border border-gray-300 px-4 py-1.5 rounded hover:bg-gray-50 transition-colors ${isScrolled ? 'text-gray-700' : 'text-white border-white hover:bg-white hover:bg-opacity-10'}`}
-  onClick={() => openAuthModal('login')}
+  onClick={() => openAuthModal()}
               >
                 Login
               </button>
@@ -520,7 +519,7 @@ const handleOptionSelection = (option: string) => {
                     <div className="flex">
                       <button 
                         className="w-full bg-teal-400 text-white py-3 rounded-lg hover:bg-teal-500 transition-colors font-medium"
-                        onClick={() => openAuthModal('signup')}
+                        onClick={() => openAuthModal()}
                       >
                         Start Your Assessment
                       </button>
@@ -584,7 +583,7 @@ const handleOptionSelection = (option: string) => {
                         />
                         <button 
                           className="absolute right-3 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full bg-teal-400 flex items-center justify-center text-white hover:bg-teal-500 transition-colors"
-                          onClick={() => openAuthModal('signup')}
+                          onClick={() => openAuthModal()}
                         >
                           <Mic size={18} />
                         </button>
@@ -594,7 +593,7 @@ const handleOptionSelection = (option: string) => {
                     <div className="mt-6 flex justify-center">
                       <button 
                         className="bg-teal-400 text-white px-6 py-3 rounded-lg hover:bg-teal-500 transition-colors font-medium"
-                        onClick={() => openAuthModal('signup')}
+                        onClick={() => openAuthModal()}
                       >
                         Start Immersive Practice Now
                       </button>
@@ -676,7 +675,7 @@ const handleOptionSelection = (option: string) => {
                     <div className="flex justify-center">
                       <button 
                         className="bg-yellow-400 text-white px-6 py-3 rounded-lg hover:bg-yellow-500 transition-colors font-medium"
-                        onClick={() => openAuthModal('signup')}
+                        onClick={() => openAuthModal()}
                       >
                         Get Personalized AI Analysis
                       </button>
@@ -727,7 +726,7 @@ const handleOptionSelection = (option: string) => {
                     <div className="flex justify-center">
                       <button 
                         className="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition-colors font-medium"
-                        onClick={() => openAuthModal('signup')}
+                        onClick={() => openAuthModal()}
                       >
                         Explore Listening Materials
                       </button>
@@ -760,7 +759,7 @@ const handleOptionSelection = (option: string) => {
               <div 
                 key={index} 
                 className={`bg-white rounded-xl border-2 transition-all cursor-pointer ${
-                  activeLanguage === language.name 
+                  selectedLang === language.name 
                     ? 'border-teal-400 shadow-md' 
                     : 'border-gray-100 hover:border-teal-200 hover:shadow-sm'
                 }`}
@@ -841,7 +840,7 @@ const handleOptionSelection = (option: string) => {
                         ? 'bg-white text-teal-500 hover:bg-gray-100' 
                         : 'bg-teal-400 text-white hover:bg-teal-500'
                     }`}
-                    onClick={() => openAuthModal('signup')}
+                    onClick={() => openAuthModal()}
                   >
                     {plan.cta}
                   </button>
@@ -863,7 +862,7 @@ const handleOptionSelection = (option: string) => {
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <button 
               className="bg-teal-400 text-white px-8 py-3 rounded-lg hover:bg-teal-500 transition-colors font-medium inline-flex items-center justify-center"
-              onClick={() => openAuthModal('signup')}
+              onClick={() => openAuthModal()}
             >
               Experience the Magic Now
               <Sparkles size={20} className="ml-2" />
@@ -896,70 +895,18 @@ const handleOptionSelection = (option: string) => {
               <p className="text-gray-400 text-sm">
                 AI-powered language learning platform for immersive conversation practice
               </p>
-              <div className="mt-4 flex space-x-4">
-                {['twitter', 'facebook', 'instagram', 'linkedin'].map(social => (
-                  <a key={social} href="#" className="text-gray-400 hover:text-teal-400">
-                    <span className="sr-only">{social}</span>
-                    <div className="w-6 h-6"></div>
-                  </a>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <h3 className="font-bold mb-4">Product</h3>
-              <ul className="space-y-2">
-                {['Features', 'Pricing', 'Languages', 'Mobile App', 'API', 'Business'].map(item => (
-                  <li key={item}>
-                    <a href="#" className="text-gray-400 hover:text-teal-400 text-sm">
-                      {item}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="font-bold mb-4">Resources</h3>
-              <ul className="space-y-2">
-                {['Blog', 'Help Center', 'Guides', 'Learning Tips', 'Language Resources', 'Webinars'].map(item => (
-                  <li key={item}>
-                    <a href="#" className="text-gray-400 hover:text-teal-400 text-sm">
-                      {item}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="font-bold mb-4">Company</h3>
-              <ul className="space-y-2">
-                {['About Us', 'Careers', 'Privacy Policy', 'Terms of Service', 'Contact Us'].map(item => (
-                  <li key={item}>
-                    <a href="#" className="text-gray-400 hover:text-teal-400 text-sm">
-                      {item}
-                    </a>
-                  </li>
-                ))}
-              </ul>
             </div>
           </div>
-          
           <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
             <p className="text-sm text-gray-500 mb-4 md:mb-0">
-              © {new Date().getFullYear()} Smart Language Coach. All rights reserved.
+              &copy; {new Date().getFullYear()} Smart Language Coach. All rights reserved.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-sm text-gray-500 hover:text-teal-400">
-                Privacy Policy
-              </a>
-              <a href="#" className="text-sm text-gray-500 hover:text-teal-400">
-                Terms of Service
-              </a>
-              <a href="#" className="text-sm text-gray-500 hover:text-teal-400">
-                Cookies
-              </a>
+              <ul className="flex space-x-4">
+                <li><span className="text-sm text-gray-500 hover:text-teal-400 underline" style={{ cursor: 'pointer' }}>Privacy Policy</span></li>
+                <li><span className="text-sm text-gray-500 hover:text-teal-400 underline" style={{ cursor: 'pointer' }}>Terms of Service</span></li>
+                <li><span className="text-sm text-gray-500 hover:text-teal-400 underline" style={{ cursor: 'pointer' }}>Cookies</span></li>
+              </ul>
             </div>
           </div>
         </div>
