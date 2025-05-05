@@ -1,11 +1,9 @@
 import axios from 'axios';
 
-// API base URL - use relative URL to work both locally and in production
-// This will automatically use the current domain in production
-const API_URL = '';
-
-// For development with a separate backend server, uncomment this:
-// const API_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : '';
+// API base URL configuration
+// In development, use localhost:8000 for backend
+// In production, use relative URL which will use the current domain
+const API_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : '';
 
 /**
  * Authentication service for handling user authentication
