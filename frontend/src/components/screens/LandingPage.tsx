@@ -12,20 +12,45 @@ import {
   Award,
   CheckCircle,
   Sparkles,
-  Brain
+  Brain,
+  User,
+  ChevronDown
 } from 'lucide-react';
-import { useAppContext } from '../../contexts/AppContext.jsx';
+import { useAppContext } from '../../contexts/AppContext';
 import AuthModal from '../common/AuthModal.jsx';
 import LanguageOptionsModal from '../common/LanguageOptionsModal.tsx';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
+// Define the type for the context
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  [key: string]: any;
+}
+
+interface AppState {
+  isLoggedIn: boolean;
+  user: User | null;
+  isLoading: boolean;
+  error: string | null;
+  successMessage: string | null;
+  [key: string]: any;
+}
 
 /**
  * Redesigned LandingPage component for the Language Learning App
  * Features a more immersive, interactive design with clearer user journeys
  */
 const LandingPage: React.FC = () => {
-  const { setLanguage } = useAppContext();
+  const { state, setLanguage, login, register, googleLogin, logout } = useAppContext() as {
+    state: AppState;
+    setLanguage: (language: string) => void;
+    login: (email: string, password: string) => Promise<any>;
+    register: (userData: any) => Promise<any>;
+    googleLogin: (token: string) => Promise<any>;
+    logout: () => void;
+  };
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const navigate = useNavigate();
   const [showOptionsModal, setShowOptionsModal] = useState(false);
@@ -33,6 +58,7 @@ const LandingPage: React.FC = () => {
   const [activeFeatureTab, setActiveFeatureTab] = useState<string | null>(null);
   const [hoverFeature, setHoverFeature] = useState<number | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const featuresRef = useRef<HTMLDivElement>(null);
   
   // Track scroll position for animations
@@ -211,12 +237,45 @@ const handleOptionSelection = (option: string) => {
             </div>
             
             <div className="flex items-center">
-              <button 
-  className={`text-sm font-medium border border-gray-300 px-4 py-1.5 rounded hover:bg-gray-50 transition-colors ${isScrolled ? 'text-gray-700' : 'text-white border-white hover:bg-white hover:bg-opacity-10'}`}
-  onClick={() => openAuthModal()}
-              >
-                Login
-              </button>
+              {state.isLoggedIn ? (
+                <div className="relative dropdown-container">
+                  <button 
+                    className={`flex items-center text-sm font-medium ${isScrolled ? 'text-gray-700' : 'text-white'}`}
+                    onClick={() => setProfileOpen(!profileOpen)}
+                  >
+                    <div className="h-8 w-8 rounded-full bg-teal-400 flex items-center justify-center text-white mr-2">
+                      {state.user?.name ? state.user.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                    <span>{state.user?.name || 'User'}</span>
+                    <ChevronDown size={16} className="ml-1" />
+                  </button>
+                  {profileOpen && (
+                    <div className="absolute z-10 right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                      <div className="py-1">
+                        <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
+                          Profile
+                        </Link>
+                        <button 
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer"
+                          onClick={() => {
+                            logout();
+                            setProfileOpen(false);
+                          }}
+                        >
+                          Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button 
+                  className={`text-sm font-medium border border-gray-300 px-4 py-1.5 rounded hover:bg-gray-50 transition-colors ${isScrolled ? 'text-gray-700' : 'text-white border-white hover:bg-white hover:bg-opacity-10'}`}
+                  onClick={() => openAuthModal()}
+                >
+                  Login
+                </button>
+              )}
             </div>
           </div>
         </div>

@@ -1,57 +1,137 @@
-import React, { useState } from 'react';
-import { X, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Mail, Lock, Eye, EyeOff, ArrowRight, Loader } from 'lucide-react';
 import { useAppContext } from '../../contexts/AppContext.jsx';
+import { useGoogleLogin } from '@react-oauth/google';
 
 /**
  * AuthModal component
  * Provides login and signup functionality in a modal dialog
  */
 const AuthModal = ({ isOpen, onClose }) => {
-  const { setIsLoggedIn } = useAppContext();
+  const { login, register, googleLogin, state } = useAppContext();
   const [mode, setMode] = useState('login'); // 'login' or 'signup'
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Google Login setup
+  const googleLoginHandler = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        setError('');
+        setIsSubmitting(true);
+        const result = await googleLogin(tokenResponse.access_token);
+        if (result.success) {
+          onClose();
+        } else {
+          setError(result.error || 'Google login failed. Please try again.');
+        }
+      } catch (err) {
+        setError('Google login failed. Please try again.');
+        console.error('Google login error:', err);
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    onError: (error) => {
+      setError('Google login failed: ' + error.message);
+      console.error('Google login error:', error);
+    }
+  });
+
+  // Clear error when switching modes
+  useEffect(() => {
+    setError('');
+  }, [mode]);
+  
+  // Set error from context if available
+  useEffect(() => {
+    if (state.error) {
+      setError(state.error);
+    }
+  }, [state.error]);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setIsSubmitting(true);
 
-    // Basic validation
-    if (!email || !password) {
-      setError('Please fill in all required fields');
-      return;
+    try {
+      // Basic validation
+      if (!email || !password) {
+        setError('Please fill in all required fields');
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (mode === 'signup') {
+        if (!name) {
+          setError('Please enter your name');
+          setIsSubmitting(false);
+          return;
+        }
+        
+        if (password !== confirmPassword) {
+          setError('Passwords do not match');
+          setIsSubmitting(false);
+          return;
+        }
+
+        if (password.length < 8) {
+          setError('Password must be at least 8 characters');
+          setIsSubmitting(false);
+          return;
+        }
+
+        if (!agreeToTerms) {
+          setError('You must agree to the Terms of Service and Privacy Policy');
+          setIsSubmitting(false);
+          return;
+        }
+        
+        // Register new user
+        const result = await register({
+          email,
+          name,
+          password
+        });
+        
+        if (result.success) {
+          onClose();
+        } else {
+          setError(result.error || 'Registration failed. Please try again.');
+        }
+      } else {
+        // Login existing user
+        const result = await login({
+          email,
+          password
+        });
+        
+        if (result.success) {
+          // Add a small delay before closing the modal to ensure state updates
+          setTimeout(() => {
+            onClose();
+          }, 100);
+        } else {
+          setError(result.error || 'Login failed. Please check your credentials.');
+        }
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
+      console.error('Auth error:', err);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    if (mode === 'signup') {
-      if (password !== confirmPassword) {
-        setError('Passwords do not match');
-        return;
-      }
-
-      if (password.length < 8) {
-        setError('Password must be at least 8 characters');
-        return;
-      }
-
-      if (!agreeToTerms) {
-        setError('You must agree to the Terms of Service and Privacy Policy');
-        return;
-      }
-    }
-
-    // In a real app, we would call an API to authenticate the user
-    // For now, we'll just simulate a successful login/signup
-    setTimeout(() => {
-      setIsLoggedIn(true);
-      onClose();
-    }, 1000);
   };
 
   return (
@@ -159,6 +239,24 @@ const AuthModal = ({ isOpen, onClose }) => {
               )}
             </div>
             
+            {/* Name (only for signup) */}
+            {mode === 'signup' && (
+              <div className="mb-4">
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-transparent"
+                  placeholder="Your full name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+            )}
+            
             {/* Confirm Password (only for signup) */}
             {mode === 'signup' && (
               <div className="mb-4">
@@ -224,10 +322,20 @@ const AuthModal = ({ isOpen, onClose }) => {
             {/* Submit Button */}
             <button 
               type="submit" 
-              className="w-full bg-teal-400 text-white py-2 px-4 rounded-lg hover:bg-teal-500 transition-colors flex items-center justify-center"
+              disabled={isSubmitting}
+              className="w-full bg-teal-400 text-white py-2 px-4 rounded-lg hover:bg-teal-500 transition-colors flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {mode === 'login' ? 'Sign In' : 'Create Account'}
-              <ArrowRight size={18} className="ml-1" />
+              {isSubmitting ? (
+                <>
+                  <Loader size={18} className="animate-spin mr-2" />
+                  {mode === 'login' ? 'Signing In...' : 'Creating Account...'}
+                </>
+              ) : (
+                <>
+                  {mode === 'login' ? 'Sign In' : 'Create Account'}
+                  <ArrowRight size={18} className="ml-1" />
+                </>
+              )}
             </button>
           </form>
           
@@ -242,7 +350,12 @@ const AuthModal = ({ isOpen, onClose }) => {
           </div>
           
           {/* Social Login */}
-          <button className="w-full flex items-center justify-center py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          <button 
+            type="button"
+            onClick={googleLoginHandler}
+            disabled={isSubmitting}
+            className="w-full flex items-center justify-center py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+          >
             <div className="w-5 h-5 mr-2 text-center text-red-500 font-bold">G</div>
             <span className="text-gray-700 font-medium">Google</span>
           </button>
