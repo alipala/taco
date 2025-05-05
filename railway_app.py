@@ -27,8 +27,16 @@ app.add_middleware(
 )
 
 # Create API router for /api endpoints
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from pydantic import BaseModel
+import jwt
+from jwt.exceptions import InvalidTokenError
+import requests
+from datetime import datetime, timedelta
+
 api_router = APIRouter(prefix="/api")
+auth_router = APIRouter(prefix="/auth")
 
 # Simple root API endpoint
 @api_router.get("/")
@@ -54,6 +62,75 @@ async def health_check():
     logger.info("Health check endpoint called")
     return {"status": "healthy"}
 
+# Authentication models
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    user_id: str
+    name: str = None
+    email: str = None
+
+class GoogleLoginRequest(BaseModel):
+    token: str
+
+# Google login endpoint
+@auth_router.post("/google-login", response_model=Token)
+async def google_login(login_data: GoogleLoginRequest):
+    """Login with Google OAuth token"""
+    logger.info("Google login endpoint called")
+    try:
+        # Get the Google client ID from environment variables
+        google_client_id = os.getenv("GOOGLE_CLIENT_ID")
+        if not google_client_id:
+            logger.error("Google client ID not found in environment variables")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Google authentication is not properly configured",
+            )
+            
+        # Verify the token with Google
+        try:
+            # For demo purposes, we'll just validate the token format and return a mock response
+            # In a real application, you would verify the token with Google's API
+            if not login_data.token or len(login_data.token) < 20:
+                raise ValueError("Invalid token format")
+                
+            # Mock user data - in a real app, this would come from Google's API response
+            user_id = "google_user_123"
+            name = "Demo User"
+            email = "demo@example.com"
+            
+            # Create a JWT token
+            access_token = jwt.encode(
+                {"sub": user_id, "exp": datetime.utcnow() + timedelta(days=1)},
+                "secret_key",  # In production, use a proper secret key
+                algorithm="HS256"
+            )
+            
+            logger.info(f"Google login successful for user: {email}")
+            
+            return {
+                "access_token": access_token,
+                "token_type": "bearer",
+                "user_id": user_id,
+                "name": name,
+                "email": email
+            }
+        except ValueError as e:
+            logger.error(f"Invalid Google token: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Invalid Google token: {str(e)}",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    except Exception as e:
+        logger.error(f"Google authentication failed: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Google authentication failed: {str(e)}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
 # Environment info endpoint
 @app.get("/env")
 async def env_info():
@@ -66,8 +143,9 @@ async def env_info():
         "port": os.getenv("PORT"),
     }
 
-# Include API router
+# Include routers
 app.include_router(api_router)
+app.include_router(auth_router)
 
 # Serve static files from the frontend build directory
 @app.on_event("startup")
