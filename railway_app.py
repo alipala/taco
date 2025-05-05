@@ -109,36 +109,73 @@ async def google_login(login_data: GoogleLoginRequest):
         
         # Verify the token with Google
         try:
-            # Use Google's tokeninfo endpoint to verify and get user information
-            google_token_info_url = f"https://www.googleapis.com/oauth2/v3/tokeninfo?id_token={login_data.token}"
-            logger.info(f"Verifying token with Google API")
+            # First try to get user info directly from Google's userinfo endpoint
+            # This is the most reliable method for access tokens
+            userinfo_url = "https://www.googleapis.com/oauth2/v2/userinfo"
+            headers = {"Authorization": f"Bearer {login_data.token}"}
+            logger.info(f"Trying to get user info directly from Google API")
             
-            response = requests.get(google_token_info_url)
+            response = requests.get(userinfo_url, headers=headers)
             
-            if response.status_code != 200:
-                logger.warning(f"Google token verification failed: {response.status_code}")
-                # Try alternative endpoint for access tokens
-                alt_url = f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={login_data.token}"
-                response = requests.get(alt_url)
+            if response.status_code == 200:
+                # Successfully got user info directly
+                user_info = response.json()
+                logger.info(f"Got user info directly from Google API: {user_info.keys()}")
                 
-                if response.status_code != 200:
-                    logger.warning(f"Alternative token verification also failed: {response.status_code}")
-                    raise ValueError(f"Invalid token: {response.text}")
-            
-            # Extract user info from token verification response
-            token_info = response.json()
-            logger.info(f"Token verified successfully: {token_info.keys()}")
-            
-            # Extract user information from verified token
-            user_id = token_info.get('sub') or token_info.get('user_id') or f"google_user_{hash(login_data.token) % 10000}"
-            name = token_info.get('name') or token_info.get('given_name', '') + ' ' + token_info.get('family_name', '')
-            email = token_info.get('email') or token_info.get('verified_email', '')
-            
-            # Clean up name if it's just a space (when given_name and family_name are missing)
-            if name.strip() == '':
-                name = f"Google User {user_id[-4:]}"
+                # Extract user information from user info response
+                user_id = user_info.get('id')
+                name = user_info.get('name')
+                email = user_info.get('email')
                 
-            logger.info(f"Extracted user info from verified token: {name}, {email}")
+                logger.info(f"Extracted user info from Google API: {name}, {email}")
+            else:
+                # If direct method fails, try token verification endpoints
+                logger.warning(f"Direct user info failed: {response.status_code}. Trying token verification.")
+                
+                # Try ID token verification first
+                id_token_url = f"https://www.googleapis.com/oauth2/v3/tokeninfo?id_token={login_data.token}"
+                response = requests.get(id_token_url)
+                
+                if response.status_code == 200:
+                    # ID token verification succeeded
+                    token_info = response.json()
+                    logger.info(f"ID token verified successfully: {token_info.keys()}")
+                    
+                    # Extract user information from verified token
+                    user_id = token_info.get('sub')
+                    name = token_info.get('name')
+                    email = token_info.get('email')
+                else:
+                    # Try access token verification as last resort
+                    logger.warning(f"ID token verification failed: {response.status_code}. Trying access token verification.")
+                    access_token_url = f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={login_data.token}"
+                    response = requests.get(access_token_url)
+                    
+                    if response.status_code == 200:
+                        # Access token verification succeeded
+                        token_info = response.json()
+                        logger.info(f"Access token verified successfully: {token_info.keys()}")
+                        
+                        # Extract user information from verified token
+                        user_id = token_info.get('user_id')
+                        # Access token verification doesn't return name/email directly
+                        # We'll need to use the user_id to create a name
+                        name = f"Google User {user_id[-6:] if user_id else ''}" 
+                        email = token_info.get('email')
+                    else:
+                        # All verification methods failed
+                        logger.warning(f"All token verification methods failed")
+                        raise ValueError(f"Invalid token: {response.text}")
+            
+            # Ensure we have valid user information
+            if not user_id:
+                user_id = f"google_user_{hash(login_data.token) % 10000}"
+            if not name or name.strip() == '':
+                name = f"Google User {user_id[-6:] if isinstance(user_id, str) else ''}"
+            if not email:
+                email = f"user{user_id[-6:] if isinstance(user_id, str) else ''}@example.com"
+                
+            logger.info(f"Final user info: {name}, {email}")
         except Exception as e:
             logger.warning(f"Error verifying token with Google: {str(e)}")
             # Fallback to token-based user ID as a last resort
