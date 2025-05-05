@@ -6,6 +6,9 @@ echo "Python path: $PYTHONPATH"
 echo "Files in current directory:"
 ls -la
 
-# Start the minimal application
-echo "Starting minimal FastAPI server on port 8000"
-python /app/railway_app.py
+# Set the Python path to include the project root
+export PYTHONPATH=$PWD
+
+# Start the application using the correct module path
+echo "Starting FastAPI server on port $PORT"
+python -m uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-8000}
