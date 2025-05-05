@@ -43,6 +43,10 @@ EXPOSE 8000
 # Set PYTHONPATH to ensure modules can be found
 ENV PYTHONPATH=/app
 
+# Copy startup script
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
 # Command to run the application
 WORKDIR /app/backend
-CMD python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+CMD ["/bin/bash", "/app/start.sh"]
