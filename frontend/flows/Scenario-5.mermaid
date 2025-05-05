@@ -1,0 +1,54 @@
+flowchart TB
+    %% Main flow states
+    Start([Start]) --> HomePage[User visits homepage]
+    HomePage --> Login[User logs in]
+    
+    %% User recognition
+    Login --> UserRecognition[System recognizes returning user with assessment]
+    UserRecognition --> AssessmentNotification[System notifies user about existing assessment]
+    AssessmentNotification --> UserDecision[User decides to start conversation]
+    UserDecision --> ConversationScreen[Redirect to Conversation Screen]
+    
+    %% Conversation screen components
+    subgraph ConversationScreen
+        LeftSection[Real Time Analysis Section]
+        RightSection[Conversation Chat Section]
+        StartSpeakingButton[Start Speaking Button]
+        AnalyseSentenceButton[Analyse Sentence Button]
+    end
+    
+    %% Conversation actions
+    ConversationScreen --> |User clicks Start Speaking| StartConvo[Start 5-minute conversation]
+    StartConvo --> ShowTranscript[Display conversation transcript]
+    ShowTranscript --> |User clicks Analyse Sentence| SentenceAssessment[Display Sentence Assessment Modal]
+    
+    %% Sentence assessment components
+    subgraph SentenceAssessment
+        ContinueLearningButton[Continue Learning Button]
+        RecognisedText[Recognised Text Section]
+        ScoreLabels[Score Labels]
+        GrammarIssues[Grammar Issues]
+        CorrectedText[Corrected Text]
+        ImprovementSuggestions[Improvement Suggestions]
+        AlternativeExpressions[Alternative Expressions]
+    end
+    
+    %% Final actions
+    SentenceAssessment --> |User clicks Continue Learning| ReturnToConvo[Return to Conversation Screen]
+    ReturnToConvo --> |5 minutes end| SessionEnd[End of session]
+    SessionEnd --> End([End])
+    
+    %% Style
+    classDef default fill:#f9f9f9,stroke:#333,stroke-width:1px;
+    classDef mainState fill:#d4f1f9,stroke:#0077be,stroke-width:2px;
+    classDef decision fill:#ffe6cc,stroke:#d79b00,stroke-width:2px;
+    classDef subgraphStyle fill:#f5f5f5,stroke:#666,stroke-width:1px;
+    classDef userAction fill:#d0f0c0,stroke:#2e8b57,stroke-width:1px;
+    classDef systemAction fill:#f0e68c,stroke:#daa520,stroke-width:1px;
+    classDef notification fill:#ffcccc,stroke:#ff6666,stroke-width:1px;
+    
+    class Start,End mainState;
+    class ConversationScreen,SentenceAssessment subgraphStyle;
+    class Login,UserDecision,StartSpeakingButton,AnalyseSentenceButton,ContinueLearningButton userAction;
+    class HomePage,UserRecognition,ShowTranscript,SessionEnd systemAction;
+    class AssessmentNotification notification;

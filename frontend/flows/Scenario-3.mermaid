@@ -1,0 +1,114 @@
+flowchart TB
+    %% Main flow states
+    Start([Start]) --> HomePage[User visits homepage]
+    HomePage --> Login[User logs in]
+    Login --> UserCheck{First time user?}
+    
+    %% First time user path
+    UserCheck -->|Yes| SelectLanguage[User selects language]
+    SelectLanguage --> Options[System displays options]
+    
+    %% Returning user path
+    UserCheck -->|No| ReturnUser[Returning user experience]
+    ReturnUser --> End
+    
+    %% Options branch
+    Options --> |User selects Assess my speaking level| AssessmentScreen[Redirect to Speaking Assessment Screen]
+    Options --> |User selects Do a Practice| PracticeOption[Do a Practice]
+    PracticeOption --> End
+    
+    %% Assessment screen components
+    subgraph AssessmentScreen
+        AssessmentSection[Speaking Assessment Section]
+        RecordingPrompt[Subtitle: Speak for 30-60 seconds]
+        RecordButton[Start Recording Button]
+    end
+    
+    %% Recording flow
+    AssessmentScreen --> |User clicks Start Recording| RecordingStarted[Recording initiated]
+    RecordingStarted --> Timer[Display circular timer and Stop Recording button]
+    Timer --> |User speaks 30-60 seconds| DisplayResults[Display assessment results]
+    
+    %% Assessment results components
+    subgraph DisplayResults
+        PlayButton[Listen to Recording Button]
+        LevelLabels[Recommended Level Labels]
+        OverallScore[Overall Score]
+        Transcription[Transcription]
+        SkillBreakdown[Skill Breakdown]
+        Strengths[Strengths]
+        AreasForImprovement[Areas for Improvement]
+        RecommendedSteps[Recommended Next Steps]
+        TryAgainButton[Try Again Button]
+        UseThisLevelButton[Use This Level Button]
+    end
+    
+    %% Learning goals flow
+    DisplayResults --> |User selects Use This Level| LearningGoalsModal[Learning Goals Modal]
+    
+    %% Learning goals components
+    subgraph LearningGoalsModal
+        GoalsTitle[Select Your Learning Goals]
+        GoalsSubtitle[Choose goals to achieve]
+        GoalsCheckboxes[Multiple checkbox options]
+        GoalsNextButton[Next Button]
+    end
+    
+    %% Duration selection flow
+    LearningGoalsModal --> |User selects goals and clicks Next| DurationModal[Duration Selection Modal]
+    
+    %% Duration selection components
+    subgraph DurationModal
+        DurationTitle[Choose Learning Duration]
+        DurationSubtitle[How long to study]
+        DurationOptions[Radio button options]
+        CreatePlanButton[Create Plan Button]
+    end
+    
+    %% Plan creation and conversation
+    DurationModal --> |User selects duration and clicks Create Plan| CustomPlan[Display Custom Plan]
+    CustomPlan --> |User chooses plan| ConversationScreen[Redirect to Conversation Screen]
+    
+    %% Conversation components
+    subgraph ConversationScreen
+        LeftSection[Real Time Analysis Section]
+        RightSection[Conversation Chat Section]
+        StartSpeakingButton[Start Speaking Button]
+        AnalyseSentenceButton[Analyse Sentence Button]
+    end
+    
+    %% Conversation actions
+    ConversationScreen --> |User clicks Start Speaking| StartConvo[Start 5-minute conversation]
+    StartConvo --> ShowTranscript[Display conversation transcript]
+    ShowTranscript --> |User clicks Analyse Sentence| SentenceAssessment[Display Sentence Assessment Modal]
+    
+    %% Sentence assessment components
+    subgraph SentenceAssessment
+        ContinueLearningButton[Continue Learning Button]
+        RecognisedText[Recognised Text Section]
+        ScoreLabels[Score Labels]
+        GrammarIssues[Grammar Issues]
+        CorrectedText[Corrected Text]
+        ImprovementSuggestions[Improvement Suggestions]
+        AlternativeExpressions[Alternative Expressions]
+    end
+    
+    %% Final actions
+    SentenceAssessment --> |User clicks Continue Learning| ReturnToConvo[Return to Conversation Screen]
+    ReturnToConvo --> |5 minutes end| FinalAssessment[System does assessment]
+    FinalAssessment --> PremiumMessage[Display "To Learn More, Be Premium"]
+    PremiumMessage --> End([End])
+    
+    %% Style
+    classDef default fill:#f9f9f9,stroke:#333,stroke-width:1px;
+    classDef mainState fill:#d4f1f9,stroke:#0077be,stroke-width:2px;
+    classDef decision fill:#ffe6cc,stroke:#d79b00,stroke-width:2px;
+    classDef subgraphStyle fill:#f5f5f5,stroke:#666,stroke-width:1px;
+    classDef userAction fill:#d0f0c0,stroke:#2e8b57,stroke-width:1px;
+    classDef systemAction fill:#f0e68c,stroke:#daa520,stroke-width:1px;
+    
+    class Start,End mainState;
+    class UserCheck decision;
+    class AssessmentScreen,DisplayResults,LearningGoalsModal,DurationModal,ConversationScreen,SentenceAssessment subgraphStyle;
+    class Login,SelectLanguage,RecordButton,UseThisLevelButton,GoalsCheckboxes,GoalsNextButton,DurationOptions,CreatePlanButton,StartSpeakingButton,AnalyseSentenceButton,ContinueLearningButton userAction;
+    class HomePage,Options,Timer,DisplayResults,CustomPlan,ShowTranscript,FinalAssessment,PremiumMessage,ReturnUser systemAction;
