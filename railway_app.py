@@ -83,15 +83,50 @@ async def startup_event():
     else:
         logger.warning(f"Frontend build directory not found at {frontend_path}")
 
+# Mount static files for specific directories
+@app.on_event("startup")
+async def mount_static_files():
+    frontend_path = "/app/frontend/build"
+    if os.path.exists(frontend_path):
+        # Mount static directories first
+        logger.info("Mounting static directories")
+        static_dirs = ["static", "assets", "images"]
+        for static_dir in static_dirs:
+            static_path = os.path.join(frontend_path, static_dir)
+            if os.path.exists(static_path) and os.path.isdir(static_path):
+                logger.info(f"Mounting /{static_dir} directory")
+                app.mount(f"/{static_dir}", StaticFiles(directory=static_path), name=static_dir)
+        
+        # Mount specific files
+        for file in ["manifest.json", "favicon.ico", "logo192.png", "logo512.png", "robots.txt"]:
+            file_path = os.path.join(frontend_path, file)
+            if os.path.exists(file_path):
+                logger.info(f"Adding route for /{file}")
+                
+                # Create a closure to capture file_path
+                def create_file_route(file_path):
+                    @app.get(f"/{os.path.basename(file_path)}")
+                    async def serve_file():
+                        return FileResponse(file_path)
+                
+                create_file_route(file_path)
+
 # Catch-all route to serve index.html for any unmatched routes (for React routing)
 @app.get("/{full_path:path}", response_class=HTMLResponse)
 async def serve_index(full_path: str, request: Request):
     logger.info(f"Catch-all route accessed: {full_path}")
     frontend_path = "/app/frontend/build"
-    index_path = os.path.join(frontend_path, "index.html")
     
+    # First check if the path exists as a static file
+    requested_path = os.path.join(frontend_path, full_path)
+    if os.path.exists(requested_path) and not os.path.isdir(requested_path):
+        logger.info(f"Serving static file: {requested_path}")
+        return FileResponse(requested_path)
+    
+    # If not a static file, serve index.html for client-side routing
+    index_path = os.path.join(frontend_path, "index.html")
     if os.path.exists(index_path):
-        logger.info(f"Serving index.html for path: {full_path}")
+        logger.info(f"Serving index.html for client-side routing: {full_path}")
         return FileResponse(index_path)
     else:
         logger.warning(f"index.html not found at {index_path}")
