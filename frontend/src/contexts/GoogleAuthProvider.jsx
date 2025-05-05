@@ -1,21 +1,19 @@
 import React from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { GOOGLE_CLIENT_ID } from '../config/google-oauth-config';
 
 /**
  * Google OAuth Provider component
  * Wraps the application with Google OAuth provider for Google Sign-In functionality
  */
 const GoogleAuthProvider = ({ children }) => {
-  // Get Google Client ID from environment variable
-  // In production, this should be set in .env file
-  const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || '41687548204-0go9lqlnve4llpv3vdl48jujddlt2kp5.apps.googleusercontent.com'; 
-  
-  // Using the same Google Client ID as configured in the backend
-  // This ensures that the Google Sign-In works properly
-  // In production, the client ID should be set in the .env file
+  // Using the Google Client ID from our configuration file
+  // For Railway deployment, make sure to update the Google OAuth configuration
+  // in the Google Developer Console to include https://tacoco.up.railway.app
+  // as an authorized JavaScript origin and redirect URI
 
   return (
-    <GoogleOAuthProvider clientId={clientId}>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       {children}
     </GoogleOAuthProvider>
   );
