@@ -4,11 +4,17 @@ This is a simplified version of our main application that will help us
 debug deployment issues on Railway.
 """
 import os
-from fastapi import FastAPI, Request
+import logging
+from datetime import datetime, timedelta
+from typing import Optional, Dict, Any
+
+# Import FastAPI components
+from fastapi import FastAPI, Request, APIRouter, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, FileResponse
-import logging
+from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
+from fastapi.security import OAuth2PasswordBearer
+from pydantic import BaseModel
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -27,16 +33,25 @@ app.add_middleware(
 )
 
 # Create API router for /api endpoints
-from fastapi import APIRouter, HTTPException, Depends, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel
-import jwt
-from jwt.exceptions import InvalidTokenError
-import requests
-from datetime import datetime, timedelta
-
+# Create API routers
 api_router = APIRouter(prefix="/api")
 auth_router = APIRouter(prefix="/auth")
+
+# Try to import JWT - with fallback for mock implementation if it fails
+try:
+    import jwt
+    logger.info("Successfully imported JWT package")
+    
+    def create_jwt_token(data: Dict[str, Any], secret_key: str) -> str:
+        return jwt.encode(data, secret_key, algorithm="HS256")
+        
+except ImportError:
+    logger.warning("JWT package not available, using mock implementation")
+    
+    # Mock JWT implementation for fallback
+    def create_jwt_token(data: Dict[str, Any], secret_key: str) -> str:
+        # Simple mock implementation that just returns a string
+        return f"mock_token_{data.get('sub', 'user')}_{datetime.utcnow().timestamp()}"
 
 # Simple root API endpoint
 @api_router.get("/")
@@ -73,62 +88,56 @@ class Token(BaseModel):
 class GoogleLoginRequest(BaseModel):
     token: str
 
-# Google login endpoint
+# Google login endpoint with simplified implementation
 @auth_router.post("/google-login", response_model=Token)
 async def google_login(login_data: GoogleLoginRequest):
     """Login with Google OAuth token"""
     logger.info("Google login endpoint called")
     try:
-        # Get the Google client ID from environment variables
-        google_client_id = os.getenv("GOOGLE_CLIENT_ID")
-        if not google_client_id:
-            logger.error("Google client ID not found in environment variables")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Google authentication is not properly configured",
+        # Get the Google client ID from environment variables (optional)
+        google_client_id = os.getenv("GOOGLE_CLIENT_ID", "default_client_id")
+        logger.info(f"Using Google client ID: {google_client_id[:5]}...")
+        
+        # Simple token validation
+        if not login_data.token or len(login_data.token) < 10:
+            logger.warning("Invalid token format received")
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"detail": "Invalid token format"}
             )
-            
-        # Verify the token with Google
+        
+        # Mock user data for demonstration
+        user_id = "google_user_123"
+        name = "Demo User"
+        email = "demo@example.com"
+        
+        # Create a JWT token using our safe wrapper function
         try:
-            # For demo purposes, we'll just validate the token format and return a mock response
-            # In a real application, you would verify the token with Google's API
-            if not login_data.token or len(login_data.token) < 20:
-                raise ValueError("Invalid token format")
-                
-            # Mock user data - in a real app, this would come from Google's API response
-            user_id = "google_user_123"
-            name = "Demo User"
-            email = "demo@example.com"
-            
-            # Create a JWT token
-            access_token = jwt.encode(
+            access_token = create_jwt_token(
                 {"sub": user_id, "exp": datetime.utcnow() + timedelta(days=1)},
-                "secret_key",  # In production, use a proper secret key
-                algorithm="HS256"
+                "secret_key"  # In production, use a proper secret key
             )
-            
-            logger.info(f"Google login successful for user: {email}")
-            
-            return {
-                "access_token": access_token,
-                "token_type": "bearer",
-                "user_id": user_id,
-                "name": name,
-                "email": email
-            }
-        except ValueError as e:
-            logger.error(f"Invalid Google token: {str(e)}")
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f"Invalid Google token: {str(e)}",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+            logger.info(f"Created access token for user: {email}")
+        except Exception as token_error:
+            logger.error(f"Error creating JWT token: {str(token_error)}")
+            access_token = f"mock_token_{user_id}_{datetime.utcnow().timestamp()}"
+            logger.info("Using fallback mock token")
+        
+        # Return successful response
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user_id": user_id,
+            "name": name,
+            "email": email
+        }
+        
     except Exception as e:
-        logger.error(f"Google authentication failed: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Google authentication failed: {str(e)}",
-            headers={"WWW-Authenticate": "Bearer"},
+        # Catch-all error handler
+        logger.error(f"Unexpected error in Google login: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": "An unexpected error occurred"}
         )
 
 # Environment info endpoint
