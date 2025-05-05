@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
+import requests
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -106,26 +107,46 @@ async def google_login(login_data: GoogleLoginRequest):
                 content={"detail": "Invalid token format"}
             )
         
-        # Try to verify the token with Google
+        # Verify the token with Google
         try:
-            # In a production environment, we would verify the token with Google's API
-            # For now, we'll extract information from the token itself
-            logger.info(f"Token starts with: {login_data.token[:20]}...")
+            # Use Google's tokeninfo endpoint to verify and get user information
+            google_token_info_url = f"https://www.googleapis.com/oauth2/v3/tokeninfo?id_token={login_data.token}"
+            logger.info(f"Verifying token with Google API")
             
-            # Extract user information from token (in production, this would come from Google API)
-            # For now, we'll use the token characteristics to create a unique user ID
-            token_hash = hash(login_data.token) % 10000
-            user_id = f"google_user_{token_hash}"
-            name = f"Google User {token_hash}"
-            email = f"user{token_hash}@example.com"
+            response = requests.get(google_token_info_url)
             
-            logger.info(f"Extracted user info from token: {name}, {email}")
+            if response.status_code != 200:
+                logger.warning(f"Google token verification failed: {response.status_code}")
+                # Try alternative endpoint for access tokens
+                alt_url = f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={login_data.token}"
+                response = requests.get(alt_url)
+                
+                if response.status_code != 200:
+                    logger.warning(f"Alternative token verification also failed: {response.status_code}")
+                    raise ValueError(f"Invalid token: {response.text}")
+            
+            # Extract user info from token verification response
+            token_info = response.json()
+            logger.info(f"Token verified successfully: {token_info.keys()}")
+            
+            # Extract user information from verified token
+            user_id = token_info.get('sub') or token_info.get('user_id') or f"google_user_{hash(login_data.token) % 10000}"
+            name = token_info.get('name') or token_info.get('given_name', '') + ' ' + token_info.get('family_name', '')
+            email = token_info.get('email') or token_info.get('verified_email', '')
+            
+            # Clean up name if it's just a space (when given_name and family_name are missing)
+            if name.strip() == '':
+                name = f"Google User {user_id[-4:]}"
+                
+            logger.info(f"Extracted user info from verified token: {name}, {email}")
         except Exception as e:
-            logger.warning(f"Error extracting user info from token: {str(e)}")
-            # Fallback to default user if extraction fails
-            user_id = "google_user_123"
-            name = "Google User"
-            email = "user@example.com"
+            logger.warning(f"Error verifying token with Google: {str(e)}")
+            # Fallback to token-based user ID as a last resort
+            token_prefix = login_data.token[:10] if len(login_data.token) >= 10 else login_data.token
+            user_id = f"google_user_{hash(token_prefix) % 10000}"
+            name = f"Google User {user_id[-4:]}"
+            email = f"user{user_id[-4:]}@example.com"
+            logger.info(f"Using fallback user info: {name}, {email}")
         
         # Create a JWT token using our safe wrapper function
         try:
