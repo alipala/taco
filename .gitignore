@@ -47,3 +47,5 @@ frontend/package-lock.json
 .env.*
 
 /designs
+/backend/migrate
+/frontend/flows
