@@ -43,7 +43,8 @@ EXPOSE 8000
 # Set PYTHONPATH to ensure modules can be found
 ENV PYTHONPATH=/app
 
-# Copy startup script
+# Copy minimal Railway application and startup script
+COPY railway_app.py /app/railway_app.py
 COPY start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
