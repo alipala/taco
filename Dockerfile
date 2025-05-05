@@ -41,4 +41,5 @@ ENV PYTHONPATH=/app
 EXPOSE 8000
 
 # Command to run the application
-CMD cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT
+WORKDIR /app/backend
+CMD python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT
