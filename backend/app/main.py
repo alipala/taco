@@ -12,11 +12,18 @@ load_dotenv()
 
 app = FastAPI(title="Taco App API", description="Backend API for Taco App")
 
-# Health check endpoint for Railway
+# Ultra simple health check endpoint for Railway
 @app.get("/health")
 async def health_check():
     # Print debug info to logs
     print("Health check endpoint called")
+    return {"status": "healthy"}
+
+# Detailed health check endpoint for debugging
+@app.get("/healthz")
+async def detailed_health_check():
+    # Print debug info to logs
+    print("Detailed health check endpoint called")
     try:
         # Check database connection
         db_status = "connected" if init_db() else "disconnected"
@@ -40,31 +47,14 @@ async def health_check():
     }
 
 # Configure CORS to allow requests from the frontend
-origins = ["*"]  # Start with permissive setting for development
+origins = ["*"]  # Use permissive setting for all environments
 
-# Check for Railway-specific environment
-if os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("RAILWAY") == "true":
-    print("Running in Railway environment, using permissive CORS settings")
-    # The correct frontend URL based on previous memory
-    frontend_url = "https://taco.up.railway.app"
-    
-    # In production Railway environment, we use wildcard origins for maximum compatibility
-    origins = ["*"]
-elif os.getenv("ENVIRONMENT") == "production":
-    # For other production environments
-    frontend_url = os.getenv("FRONTEND_URL", "https://taco.up.railway.app")
-    origins = [
-        frontend_url,
-        "https://taco.up.railway.app",
-    ]
-else:
-    # For local development - explicitly include localhost:3000
-    origins = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "*"
-    ]
-    frontend_url = "http://localhost:3000"
+# Print environment information
+print(f"Running with environment variables:")
+print(f"RAILWAY: {os.getenv('RAILWAY')}")
+print(f"RAILWAY_ENVIRONMENT: {os.getenv('RAILWAY_ENVIRONMENT')}")
+print(f"ENVIRONMENT: {os.getenv('ENVIRONMENT')}")
+print(f"PORT: {os.getenv('PORT')}")
 
 print(f"Configured CORS with origins: {origins}")
 
@@ -80,7 +70,7 @@ app.add_middleware(
 app.include_router(api.router)
 app.include_router(auth_router)
 
-# Initialize MongoDB on startup
+# Initialize database
 @app.on_event("startup")
 async def startup_db_client():
     try:
