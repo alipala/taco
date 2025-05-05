@@ -8,11 +8,11 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 const GoogleAuthProvider = ({ children }) => {
   // Get Google Client ID from environment variable
   // In production, this should be set in .env file
-  const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || '123456789-example.apps.googleusercontent.com'; 
+  const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || '41687548204-0go9lqlnve4llpv3vdl48jujddlt2kp5.apps.googleusercontent.com'; 
   
-  // For development purposes, we'll use a dummy client ID if none is provided
-  // This allows the app to load without errors, though Google login won't work
-  // In production, a real client ID must be provided in the .env file
+  // Using the same Google Client ID as configured in the backend
+  // This ensures that the Google Sign-In works properly
+  // In production, the client ID should be set in the .env file
 
   return (
     <GoogleOAuthProvider clientId={clientId}>

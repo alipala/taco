@@ -53,7 +53,20 @@ const authService = {
    */
   googleLogin: async (token) => {
     try {
-      const response = await axios.post(`${API_URL}/auth/google-login`, { token });
+      console.log('Sending Google login request to backend');
+      console.log('API URL:', `${API_URL}/auth/google-login`);
+      console.log('Token type:', typeof token);
+      console.log('Token length:', token.length);
+      
+      // Make the request with detailed error handling
+      const response = await axios.post(`${API_URL}/auth/google-login`, { token })
+        .catch(err => {
+          console.error('Google login request failed:', err.response?.status, err.response?.statusText);
+          console.error('Error details:', err.response?.data);
+          throw err;
+        });
+      
+      console.log('Google login response received:', response.status);
       
       // Store token in localStorage
       if (response.data.access_token) {
@@ -63,10 +76,12 @@ const authService = {
           name: response.data.name,
           email: response.data.email
         }));
+        console.log('User data stored in localStorage');
       }
       
       return response.data;
     } catch (error) {
+      console.error('Google login error in authService:', error);
       throw error.response?.data || { detail: 'Google login failed' };
     }
   },

@@ -27,15 +27,24 @@ const AuthModal = ({ isOpen, onClose }) => {
       try {
         setError('');
         setIsSubmitting(true);
+        
+        // Log token information for debugging
+        console.log('Google login successful, received token');
+        console.log('Token type:', typeof tokenResponse.access_token);
+        console.log('Token length:', tokenResponse.access_token.length);
+        console.log('Token starts with:', tokenResponse.access_token.substring(0, 20));
+        
         const result = await googleLogin(tokenResponse.access_token);
         if (result.success) {
+          console.log('Backend login successful');
           onClose();
         } else {
+          console.error('Backend login failed:', result.error);
           setError(result.error || 'Google login failed. Please try again.');
         }
       } catch (err) {
-        setError('Google login failed. Please try again.');
         console.error('Google login error:', err);
+        setError('Google login failed. Please try again.');
       } finally {
         setIsSubmitting(false);
       }

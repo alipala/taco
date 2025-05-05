@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import datetime, timedelta
 from typing import Optional
-import httpx
 import os
+import httpx
 
 # Import Google Auth libraries
 from google.oauth2 import id_token
@@ -131,14 +131,48 @@ async def google_login(login_data: GoogleLoginRequest):
         
         # Verify the token using Google Auth library
         try:
-            google_data = id_token.verify_oauth2_token(
-                login_data.token, 
-                google_requests.Request(), 
-                google_client_id
-            )
+            # Print debugging information
+            print(f"Attempting to verify Google token with client ID: {google_client_id}")
+            print(f"Token starts with: {login_data.token[:20]}...")
+            
+            # We need to handle both ID tokens and access tokens
+            # First, try to verify as an ID token
+            try:
+                # Try to verify as ID token
+                google_data = id_token.verify_oauth2_token(
+                    login_data.token, 
+                    google_requests.Request(), 
+                    google_client_id
+                )
+                print("Successfully verified as ID token")
+            except ValueError as e:
+                # If ID token verification fails, it might be an access token
+                # For access tokens, we need to make a request to Google's userinfo endpoint
+                print(f"ID token verification failed: {str(e)}")
+                print("Trying as access token instead...")
+                
+                try:
+                    # Use the access token to get user info from Google
+                    userinfo_endpoint = "https://www.googleapis.com/oauth2/v3/userinfo"
+                    headers = {"Authorization": f"Bearer {login_data.token}"}
+                    
+                    async with httpx.AsyncClient() as client:
+                        response = await client.get(userinfo_endpoint, headers=headers)
+                        response.raise_for_status()
+                        google_data = response.json()
+                    
+                    print("Successfully retrieved user info using access token")
+                except Exception as access_token_error:
+                    print(f"Access token verification failed: {str(access_token_error)}")
+                    raise ValueError("Failed to verify token as either ID token or access token") from access_token_error
+            
+            # Print success message
+            print(f"Google token processed: {google_data.get('email')}")
             
             # Get user email from verified token
             email = google_data.get("email")
+            print(f"Email from token: {email}")
+            
             if not email:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -148,6 +182,7 @@ async def google_login(login_data: GoogleLoginRequest):
                 
             # Check if user exists
             user = await users_collection.find_one({"email": email})
+            
             if not user:
                 # Create new user
                 name = google_data.get("name", "Google User")
@@ -190,9 +225,11 @@ async def google_login(login_data: GoogleLoginRequest):
             }
         except ValueError as e:
             # Token validation failed
+            error_message = f"Invalid Google token: {str(e)}"
+            print(f"Google token validation error: {error_message}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f"Invalid Google token: {str(e)}",
+                detail=error_message,
                 headers={"WWW-Authenticate": "Bearer"},
             )
     except Exception as e:
