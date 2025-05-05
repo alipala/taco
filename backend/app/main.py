@@ -11,6 +11,11 @@ load_dotenv()
 
 app = FastAPI(title="Taco App API", description="Backend API for Taco App")
 
+# Health check endpoint for Railway
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
+
 # Configure CORS to allow requests from the frontend
 origins = ["*"]  # Start with permissive setting for development
 
