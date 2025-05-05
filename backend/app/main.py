@@ -1,4 +1,5 @@
 import os
+import datetime
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,7 +15,29 @@ app = FastAPI(title="Taco App API", description="Backend API for Taco App")
 # Health check endpoint for Railway
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy"}
+    # Print debug info to logs
+    print("Health check endpoint called")
+    try:
+        # Check database connection
+        db_status = "connected" if init_db() else "disconnected"
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+    
+    # Get environment info
+    env_info = {
+        "RAILWAY": os.getenv("RAILWAY"),
+        "PORT": os.getenv("PORT"),
+        "MONGODB_URL": "***" if os.getenv("MONGODB_URL") else None,
+        "DATABASE_NAME": os.getenv("DATABASE_NAME"),
+        "PYTHON_PATH": os.getenv("PYTHONPATH")
+    }
+    
+    return {
+        "status": "healthy",
+        "timestamp": str(datetime.datetime.now()),
+        "database": db_status,
+        "environment": env_info
+    }
 
 # Configure CORS to allow requests from the frontend
 origins = ["*"]  # Start with permissive setting for development

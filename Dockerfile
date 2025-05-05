@@ -40,6 +40,9 @@ ENV PYTHONPATH=/app
 # Expose the port
 EXPOSE 8000
 
+# Set PYTHONPATH to ensure modules can be found
+ENV PYTHONPATH=/app
+
 # Command to run the application
 WORKDIR /app/backend
 CMD python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT
