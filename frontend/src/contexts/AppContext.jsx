@@ -16,7 +16,7 @@ export const useAppContext = () => {
 };
 
 // Action types
-const SET_SUCCESS_MESSAGE = 'SET_SUCCESS_MESSAGE';
+// (Action types will be added as needed)
 
 /**
  * AppProvider component

@@ -18,7 +18,7 @@ const AuthModal = ({ isOpen, onClose }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  // Removed unused state variables
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Google Login setup

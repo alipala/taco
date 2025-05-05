@@ -22,7 +22,7 @@ import LanguageOptionsModal from '../common/LanguageOptionsModal.tsx';
 import { useNavigate, Link } from 'react-router-dom';
 
 // Define the type for the context
-interface User {
+interface AppUser {
   id: string;
   name: string;
   email: string;
@@ -31,7 +31,7 @@ interface User {
 
 interface AppState {
   isLoggedIn: boolean;
-  user: User | null;
+  user: AppUser | null;
   isLoading: boolean;
   error: string | null;
   successMessage: string | null;
@@ -43,12 +43,9 @@ interface AppState {
  * Features a more immersive, interactive design with clearer user journeys
  */
 const LandingPage: React.FC = () => {
-  const { state, setLanguage, login, register, googleLogin, logout } = useAppContext() as {
+  const { state, setLanguage, logout } = useAppContext() as {
     state: AppState;
     setLanguage: (language: string) => void;
-    login: (email: string, password: string) => Promise<any>;
-    register: (userData: any) => Promise<any>;
-    googleLogin: (token: string) => Promise<any>;
     logout: () => void;
   };
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
