@@ -86,8 +86,94 @@ class Token(BaseModel):
     name: str = None
     email: str = None
 
+class UserCreate(BaseModel):
+    email: str
+    password: str
+    name: str
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
 class GoogleLoginRequest(BaseModel):
     token: str
+
+# User registration endpoint
+@auth_router.post("/register", response_model=Token)
+async def register(user: UserCreate):
+    """Register a new user"""
+    logger.info(f"Registration endpoint called for email: {user.email}")
+    try:
+        # In a real app, you would check if the user already exists
+        # and hash the password before storing it
+        
+        # For this simplified version, we'll create a mock user
+        user_id = f"user_{hash(user.email) % 10000}"
+        
+        # Create a JWT token
+        access_token = create_jwt_token(
+            {"sub": user_id, "exp": datetime.utcnow() + timedelta(days=1)},
+            "secret_key"  # In production, use a proper secret key
+        )
+        
+        logger.info(f"User registered successfully: {user.email}")
+        
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user_id": user_id,
+            "name": user.name,
+            "email": user.email
+        }
+    except Exception as e:
+        logger.error(f"Registration failed: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": f"Registration failed: {str(e)}"}
+        )
+
+# User login endpoint
+@auth_router.post("/login", response_model=Token)
+async def login(login_data: LoginRequest):
+    """Login with email and password"""
+    logger.info(f"Login endpoint called for email: {login_data.email}")
+    try:
+        # In a real app, you would verify the password against a stored hash
+        # For this simplified version, we'll accept any credentials for test users
+        
+        # Check if this is a test user (for demo purposes)
+        if login_data.email.startswith("test") and login_data.password == "password123":
+            user_id = f"user_{hash(login_data.email) % 10000}"
+            name = "Test User"
+            
+            # Create a JWT token
+            access_token = create_jwt_token(
+                {"sub": user_id, "exp": datetime.utcnow() + timedelta(days=1)},
+                "secret_key"  # In production, use a proper secret key
+            )
+            
+            logger.info(f"User logged in successfully: {login_data.email}")
+            
+            return {
+                "access_token": access_token,
+                "token_type": "bearer",
+                "user_id": user_id,
+                "name": name,
+                "email": login_data.email
+            }
+        else:
+            # Invalid credentials
+            logger.warning(f"Invalid login credentials for: {login_data.email}")
+            return JSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content={"detail": "Invalid email or password"}
+            )
+    except Exception as e:
+        logger.error(f"Login failed: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": f"Login failed: {str(e)}"}
+        )
 
 # Google login endpoint with token verification
 @auth_router.post("/google-login", response_model=Token)
