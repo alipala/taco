@@ -101,11 +101,16 @@ class GoogleLoginRequest(BaseModel):
 # In-memory database for users (for testing purposes)
 registered_users = {}
 
-# Registration response model
+# Registration response model - can return either a success message or a token
 class RegistrationResponse(BaseModel):
-    message: str
+    message: str = None
     email: str
     success: bool = True
+    # Optional token fields for backward compatibility with deployed frontend
+    access_token: str = None
+    token_type: str = None
+    user_id: str = None
+    name: str = None
 
 # User registration endpoint
 @auth_router.post("/register", response_model=RegistrationResponse)
@@ -136,11 +141,24 @@ async def register(user: UserCreate):
         logger.info(f"User registered successfully: {user.email}")
         logger.info(f"Total registered users: {len(registered_users)}")
         
-        # Return success message without token
+        # Create a JWT token for backward compatibility with deployed frontend
+        # This maintains the existing behavior on Railway.app while local development
+        # will use the updated flow (register then login separately)
+        access_token = create_jwt_token(
+            {"sub": user_id, "exp": datetime.utcnow() + timedelta(days=1)},
+            "secret_key"  # In production, use a proper secret key
+        )
+        
+        # Return both success message and token fields for compatibility
         return {
             "message": "Registration successful! Please log in with your credentials.",
             "email": user.email,
-            "success": True
+            "success": True,
+            # Include token fields for backward compatibility
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user_id": user_id,
+            "name": user.name
         }
     except Exception as e:
         logger.error(f"Registration failed: {str(e)}")
