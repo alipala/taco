@@ -191,15 +191,20 @@ export const AppProvider = ({ children }) => {
       }));
       
       // Register the user
-      await authService.register(userData);
+      const response = await authService.register(userData);
       
-      // After registration, automatically log in the user
-      const loginResult = await login({
-        email: userData.email,
-        password: userData.password
-      });
+      // Set success message but don't log in the user
+      setState(prevState => ({
+        ...prevState,
+        isLoading: false,
+        successMessage: response.message || 'Registration successful! Please log in with your credentials.',
+        error: null
+      }));
       
-      return loginResult;
+      return { 
+        success: true, 
+        message: response.message || 'Registration successful! Please log in with your credentials.' 
+      };
     } catch (error) {
       setState(prevState => ({
         ...prevState,

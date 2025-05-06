@@ -12,13 +12,17 @@ const authService = {
   /**
    * Register a new user
    * @param {Object} userData - User registration data
-   * @returns {Promise} - Promise with user data
+   * @returns {Promise} - Promise with registration result
    */
   register: async (userData) => {
     try {
       const response = await axios.post(`${API_URL}/auth/register`, userData);
+      console.log('Registration response:', response.data);
+      // Don't store any tokens or user data after registration
+      // Just return the response data with success message
       return response.data;
     } catch (error) {
+      console.error('Registration error:', error.response?.data || error);
       throw error.response?.data || { detail: 'Registration failed' };
     }
   },

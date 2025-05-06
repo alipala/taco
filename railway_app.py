@@ -101,8 +101,14 @@ class GoogleLoginRequest(BaseModel):
 # In-memory database for users (for testing purposes)
 registered_users = {}
 
+# Registration response model
+class RegistrationResponse(BaseModel):
+    message: str
+    email: str
+    success: bool = True
+
 # User registration endpoint
-@auth_router.post("/register", response_model=Token)
+@auth_router.post("/register", response_model=RegistrationResponse)
 async def register(user: UserCreate):
     """Register a new user"""
     logger.info(f"Registration endpoint called for email: {user.email}")
@@ -127,21 +133,14 @@ async def register(user: UserCreate):
             "password": user.password  # In a real app, this would be hashed
         }
         
-        # Create a JWT token
-        access_token = create_jwt_token(
-            {"sub": user_id, "exp": datetime.utcnow() + timedelta(days=1)},
-            "secret_key"  # In production, use a proper secret key
-        )
-        
         logger.info(f"User registered successfully: {user.email}")
         logger.info(f"Total registered users: {len(registered_users)}")
         
+        # Return success message without token
         return {
-            "access_token": access_token,
-            "token_type": "bearer",
-            "user_id": user_id,
-            "name": user.name,
-            "email": user.email
+            "message": "Registration successful! Please log in with your credentials.",
+            "email": user.email,
+            "success": True
         }
     except Exception as e:
         logger.error(f"Registration failed: {str(e)}")
