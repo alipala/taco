@@ -98,17 +98,34 @@ class LoginRequest(BaseModel):
 class GoogleLoginRequest(BaseModel):
     token: str
 
+# In-memory database for users (for testing purposes)
+registered_users = {}
+
 # User registration endpoint
 @auth_router.post("/register", response_model=Token)
 async def register(user: UserCreate):
     """Register a new user"""
     logger.info(f"Registration endpoint called for email: {user.email}")
     try:
-        # In a real app, you would check if the user already exists
-        # and hash the password before storing it
+        # Check if user already exists
+        if user.email in registered_users:
+            logger.warning(f"User already exists: {user.email}")
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"detail": "Email already registered"}
+            )
         
-        # For this simplified version, we'll create a mock user
+        # For this simplified version, we'll store the user in memory
+        # In a real app, you would hash the password and store in a database
         user_id = f"user_{hash(user.email) % 10000}"
+        
+        # Store user in our in-memory database
+        registered_users[user.email] = {
+            "user_id": user_id,
+            "name": user.name,
+            "email": user.email,
+            "password": user.password  # In a real app, this would be hashed
+        }
         
         # Create a JWT token
         access_token = create_jwt_token(
@@ -117,6 +134,7 @@ async def register(user: UserCreate):
         )
         
         logger.info(f"User registered successfully: {user.email}")
+        logger.info(f"Total registered users: {len(registered_users)}")
         
         return {
             "access_token": access_token,
@@ -138,10 +156,7 @@ async def login(login_data: LoginRequest):
     """Login with email and password"""
     logger.info(f"Login endpoint called for email: {login_data.email}")
     try:
-        # In a real app, you would verify the password against a stored hash
-        # For this simplified version, we'll accept any credentials for test users
-        
-        # Check if this is a test user (for demo purposes)
+        # First check if this is a test user (for demo purposes)
         if login_data.email.startswith("test") and login_data.password == "password123":
             user_id = f"user_{hash(login_data.email) % 10000}"
             name = "Test User"
@@ -152,7 +167,7 @@ async def login(login_data: LoginRequest):
                 "secret_key"  # In production, use a proper secret key
             )
             
-            logger.info(f"User logged in successfully: {login_data.email}")
+            logger.info(f"Test user logged in successfully: {login_data.email}")
             
             return {
                 "access_token": access_token,
@@ -161,13 +176,35 @@ async def login(login_data: LoginRequest):
                 "name": name,
                 "email": login_data.email
             }
-        else:
-            # Invalid credentials
-            logger.warning(f"Invalid login credentials for: {login_data.email}")
-            return JSONResponse(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                content={"detail": "Invalid email or password"}
-            )
+        
+        # Then check our in-memory registered users
+        if login_data.email in registered_users:
+            user = registered_users[login_data.email]
+            
+            # Verify password (in a real app, you would compare hashed passwords)
+            if user["password"] == login_data.password:
+                # Create a JWT token
+                access_token = create_jwt_token(
+                    {"sub": user["user_id"], "exp": datetime.utcnow() + timedelta(days=1)},
+                    "secret_key"  # In production, use a proper secret key
+                )
+                
+                logger.info(f"Registered user logged in successfully: {login_data.email}")
+                
+                return {
+                    "access_token": access_token,
+                    "token_type": "bearer",
+                    "user_id": user["user_id"],
+                    "name": user["name"],
+                    "email": user["email"]
+                }
+        
+        # Invalid credentials
+        logger.warning(f"Invalid login credentials for: {login_data.email}")
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"detail": "Invalid email or password"}
+        )
     except Exception as e:
         logger.error(f"Login failed: {str(e)}")
         return JSONResponse(
