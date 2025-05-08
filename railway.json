@@ -2,11 +2,13 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "cd frontend && npm install && npm run build"
+    "buildCommand": "chmod +x prepare_railway_build.sh && ./prepare_railway_build.sh && npm --prefix frontend install && npm --prefix frontend run build && pip install -r backend/requirements.txt"
   },
   "deploy": {
-    "startCommand": "cd frontend && npx serve -s build",
+    "startCommand": "/bin/sh -c 'export PYTHONPATH=/app && cd /app && python -m uvicorn railway_app:app --host 0.0.0.0 --port $PORT'",
     "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 10
+    "restartPolicyMaxRetries": 10,
+    "healthcheckPath": "/health",
+    "healthcheckTimeout": 300
   }
 }

@@ -1,0 +1,85 @@
+flowchart TB
+    %% Main flow states
+    Start([Start]) --> HomePage[User visits homepage]
+    HomePage --> SelectLanguage[User selects language from 6 options]
+    SelectLanguage --> Options[System displays options]
+    
+    %% Options branch
+    Options --> |User selects Assess my speaking level| AssessmentScreen[Redirect to Speaking Assessment Screen]
+    Options --> |User selects Do a Practice| PracticeOption[Do a Practice]
+    
+    %% Assessment screen components
+    subgraph AssessmentScreen
+        AuthBanner[Authentication Banner]
+        SignInButton[Sign In Button]
+        AssessmentSection[Speaking Assessment Section]
+        RecordButton[Start Recording Button]
+    end
+    
+    %% Recording flow
+    AssessmentScreen --> |User clicks Start Recording| RecordingStarted[Recording initiated]
+    RecordingStarted --> StartTimer[Display warning notification and 15 second timer]
+    StartTimer --> |15 seconds complete| DisplayResults[Display assessment results]
+    
+    %% Assessment results components
+    subgraph DisplayResults
+        PlayButton[Listen to Recording Button]
+        LevelLabels[Recommended Level Labels]
+        OverallScore[Overall Score]
+        Transcription[Transcription]
+        SkillBreakdown[Skill Breakdown]
+        Strengths[Strengths]
+        AreasForImprovement[Areas for Improvement]
+        RecommendedSteps[Recommended Next Steps]
+        TryAgainButton[Try Again Button]
+        UseThisLevelButton[Use This Level Button]
+    end
+    
+    %% Conversation screen flow
+    DisplayResults --> |User selects Use This Level| ConversationScreen[Redirect to Conversation Screen]
+    
+    %% Conversation screen components
+    subgraph ConversationScreen
+        LeftSection[Real Time Analysis Section]
+        RightSection[Conversation Chat Section]
+        StartSpeakingButton[Start Speaking Button]
+        AnalyseSentenceButton[Analyse Sentence Button]
+    end
+    
+    %% Conversation actions
+    ConversationScreen --> |User clicks Start Speaking| StartConvo[Start conversation for 1 minute]
+    StartConvo --> ShowTranscript[Display conversation transcript]
+    ShowTranscript --> |User clicks Analyse Sentence| SentenceAssessment[Display Sentence Assessment Modal]
+    
+    %% Sentence assessment components
+    subgraph SentenceAssessment
+        ContinueLearningButton[Continue Learning Button]
+        RecognisedText[Recognised Text Section]
+        ScoreLabels[Score Labels]
+        GrammarIssues[Grammar Issues]
+        CorrectedText[Corrected Text]
+        ImprovementSuggestions[Improvement Suggestions]
+        AlternativeExpressions[Alternative Expressions]
+    end
+    
+    %% Final actions
+    SentenceAssessment --> |User clicks Continue Learning| ReturnToConvo[Return to Conversation Screen]
+    ReturnToConvo --> |Time is UP| DisplayAlert[Display Register Now Alert]
+    DisplayAlert --> End([End])
+    
+    %% Practice path (connecting loose end)
+    PracticeOption --> End
+    
+    %% Style
+    classDef default fill:#f9f9f9,stroke:#333,stroke-width:1px;
+    classDef mainState fill:#d4f1f9,stroke:#0077be,stroke-width:2px;
+    classDef decision fill:#ffe6cc,stroke:#d79b00,stroke-width:2px;
+    classDef subgraphStyle fill:#f5f5f5,stroke:#666,stroke-width:1px;
+    classDef userAction fill:#d0f0c0,stroke:#2e8b57,stroke-width:1px;
+    classDef systemAction fill:#f0e68c,stroke:#daa520,stroke-width:1px;
+    
+    class Start,End mainState;
+    class Options,RecordingStarted decision;
+    class AssessmentScreen,DisplayResults,ConversationScreen,SentenceAssessment subgraphStyle;
+    class SelectLanguage,RecordButton,TryAgainButton,UseThisLevelButton,StartSpeakingButton,AnalyseSentenceButton,ContinueLearningButton userAction;
+    class HomePage,StartTimer,DisplayResults,ShowTranscript,DisplayAlert,StartConvo,SentenceAssessment,PracticeOption systemAction;

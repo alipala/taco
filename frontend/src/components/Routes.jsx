@@ -10,6 +10,7 @@ import ConversationScreen from './screens/ConversationScreen.tsx';
 import SpeakingAssessmentScreen from './screens/SpeakingAssessmentScreen.jsx';
 import SpeechConversationScreen from './screens/SpeechConversationScreen.jsx';
 import UserProfileDashboard from './screens/UserProfileDashboard.jsx';
+import ProtectedRoute from './common/ProtectedRoute.jsx';
 
 /**
  * AppRoutes component
@@ -27,7 +28,7 @@ const AppRoutes = () => {
         <Route path="/topic-selection" element={<TopicSelectionScreen />} />
         <Route path="/conversation" element={<ConversationScreen />} />
         <Route path="/speech-conversation" element={<SpeechConversationScreen />} />
-        <Route path="/profile" element={<UserProfileDashboard />} />
+        <Route path="/profile" element={<ProtectedRoute><UserProfileDashboard /></ProtectedRoute>} />
         
         {/* Redirect any unknown routes to home */}
         <Route path="*" element={<Navigate to="/" replace />} />

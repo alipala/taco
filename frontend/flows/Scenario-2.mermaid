@@ -1,0 +1,53 @@
+flowchart TB
+    %% Main flow states
+    Start([Start]) --> HomePage[User visits homepage]
+    HomePage --> SelectLanguage[User selects language from 6 options]
+    SelectLanguage --> Options[System displays options]
+    
+    %% Options branch
+    Options --> |User selects Assess my speaking level| Assessment[Redirect to Assessment]
+    Options --> |User selects Do a Practice| PracticeScreen[Redirect to Practice Screen]
+    
+    %% Practice screen components
+    subgraph PracticeScreen
+        AuthBanner[Authentication Banner with warning message]
+        RecordButton[Start Recording Button with microphone icon]
+    end
+    
+    %% Recording flow
+    PracticeScreen --> |User clicks Start Recording| RecordingStarted[Recording initiated]
+    RecordingStarted --> DisplayWarning[Display warning notification]
+    DisplayWarning --> StartTimer[Display 1 minute timer and Stop Recording button]
+    StartTimer --> |1 minute complete| DisplayResults[Display practice results with Register Now alert]
+    
+    %% Results components
+    subgraph DisplayResults
+        RegisterAlert[Register Now and Speak More alert]
+        PlayButton[Listen to Your Recording Button]
+        LevelLabels[Recommended Level Labels]
+        OverallScore[Overall Score]
+        Transcription[Transcription]
+        SkillBreakdown[Skill Breakdown]
+        Strengths[Strengths]
+        AreasForImprovement[Areas for Improvement]
+        RecommendedSteps[Recommended Next Steps]
+    end
+    
+    DisplayResults --> End([End])
+    
+    %% Connect loose end for completeness
+    Assessment --> End
+    
+    %% Style
+    classDef default fill:#f9f9f9,stroke:#333,stroke-width:1px;
+    classDef mainState fill:#d4f1f9,stroke:#0077be,stroke-width:2px;
+    classDef decision fill:#ffe6cc,stroke:#d79b00,stroke-width:2px;
+    classDef subgraphStyle fill:#f5f5f5,stroke:#666,stroke-width:1px;
+    classDef userAction fill:#d0f0c0,stroke:#2e8b57,stroke-width:1px;
+    classDef systemAction fill:#f0e68c,stroke:#daa520,stroke-width:1px;
+    
+    class Start,End mainState;
+    class Options,RecordingStarted decision;
+    class PracticeScreen,DisplayResults subgraphStyle;
+    class SelectLanguage,RecordButton userAction;
+    class HomePage,DisplayWarning,StartTimer,DisplayResults,Assessment systemAction;
